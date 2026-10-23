@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - BlogSpace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>BlogSpace</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="login.html">Login</a>
+        </nav>
+    </header>
+
+    <main class="form-container">
+        <h2>Create an Account</h2>
+        <p class="form-description">Join the BlogSpace community.</p>
+
+        <form id="register-form">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name"
+                   placeholder="Enter your name" required>
+
+            <label for="register-email">Email Address</label>
+            <input type="email" id="register-email" name="email"
+                   placeholder="Enter your email" required>
+
+            <label for="register-password">Password</label>
+            <input type="password" id="register-password" name="password"
+                   placeholder="Create a password" minlength="6" required>
+
+            <button class="btn" type="submit">Register</button>
+            <p id="register-message" role="status"></p>
+        </form>
+
+        <p class="form-description">
+            Already registered?
+            <a href="login.html">Login here</a>
+        </p>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 BlogSpace. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
