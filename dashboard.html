@@ -11,25 +11,40 @@
 
     <header>
         <h1>BlogSpace</h1>
+
         <nav>
             <a href="index.html">Home</a>
             <a href="create-blog.html">Create Blog</a>
-            <a href="login.html">Login</a>
+            <a href="login.html" id="logout-link">Logout</a>
         </nav>
     </header>
 
     <main class="blogs">
+
         <h2 id="dashboard-title">My Dashboard</h2>
+
         <p>Manage your stories and explore your creativity.</p>
 
-        <a class="btn" href="create-blog.html">+ Create New Blog</a>
+        <a class="btn" href="create-blog.html">
+            + Create New Blog
+        </a>
 
         <section>
             <h2>My Blogs</h2>
+
             <div id="my-blog-list">
                 <p>Your published blogs will appear here.</p>
             </div>
         </section>
+
+        <section>
+            <h2>Explore All Blogs</h2>
+
+            <div id="blog-list">
+                <p>Loading blogs...</p>
+            </div>
+        </section>
+
     </main>
 
     <footer>
@@ -37,5 +52,16 @@
     </footer>
 
     <script src="script.js"></script>
+
+    <script>
+        const logoutLink = document.getElementById("logout-link");
+
+logoutLink.addEventListener("click", function () {
+    localStorage.removeItem("blogUser");
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("token");
+});
+    </script>
+
 </body>
 </html>
