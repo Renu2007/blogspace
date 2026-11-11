@@ -43,6 +43,16 @@ function showMessage(element, message, success = false) {
     element.style.color = success ? "green" : "red";
 }
 
+// CHECK IF USER OWNS BLOG
+function isBlogOwner(blog) {
+    const user = JSON.parse(
+        localStorage.getItem("blogUser") || "null"
+    );
+
+    return user && user.id && blog.authorId &&
+        String(user.id) === String(blog.authorId);
+}
+
 // REGISTER
 if (registerForm) {
     registerForm.addEventListener("submit", async function (event) {
@@ -83,13 +93,10 @@ if (loginForm) {
         try {
             const result = await apiRequest("/login", credentials, "POST");
 
-            console.log("Login response:", result);
-
             if (!result.token) {
                 throw new Error("Token not received from backend");
             }
 
-            // Store JWT token and user details
             localStorage.setItem("token", result.token);
             localStorage.setItem("blogUser", JSON.stringify(result.user));
             localStorage.setItem("loggedInUser", result.user.email);
@@ -105,16 +112,66 @@ if (loginForm) {
     });
 }
 
-// DASHBOARD WELCOME MESSAGE
-const welcomeMessage = document.getElementById("welcome-message");
+// PROTECT DASHBOARD
+const isDashboardPage =
+    window.location.pathname.endsWith("dashboard.html");
 
-if (welcomeMessage) {
-    const user = JSON.parse(localStorage.getItem("blogUser") || "null");
+if (isDashboardPage && !localStorage.getItem("token")) {
+    localStorage.removeItem("blogUser");
+    localStorage.removeItem("loggedInUser");
 
-    if (user) {
-        welcomeMessage.textContent = "Welcome, " + user.name + "!";
-    } else {
-        welcomeMessage.textContent = "Welcome to BlogSpace!";
+    window.location.replace("login.html");
+}
+
+// LOGOUT
+const logoutLink = document.getElementById("logout-link");
+
+if (logoutLink) {
+    logoutLink.addEventListener("click", function (event) {
+        event.preventDefault();
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("blogUser");
+        localStorage.removeItem("loggedInUser");
+
+        window.location.href = "login.html";
+    });
+}
+
+// LOAD USER PROFILE
+async function loadProfile() {
+    const nameElement = document.getElementById("profile-name");
+    const emailElement = document.getElementById("profile-email");
+
+    if (!nameElement || !emailElement) return;
+
+    try {
+        const user = await apiRequest("/profile");
+
+        nameElement.textContent = user.name;
+        emailElement.textContent = user.email;
+
+        document.getElementById("dashboard-title").textContent =
+            "Welcome, " + user.name + "!";
+
+        localStorage.setItem("blogUser", JSON.stringify({
+            id: user._id,
+            name: user.name,
+            email: user.email
+        }));
+
+    } catch (error) {
+        nameElement.textContent = "Unable to load profile";
+        emailElement.textContent = error.message;
+
+        if (error.message.includes("token") ||
+            error.message.includes("login")) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("blogUser");
+            localStorage.removeItem("loggedInUser");
+
+            window.location.href = "login.html";
+        }
     }
 }
 
@@ -144,6 +201,7 @@ async function editBlog(blog) {
         );
 
         alert(result.message || "Blog updated successfully!");
+
         loadBlogs();
         loadBlogDetails();
 
@@ -154,7 +212,9 @@ async function editBlog(blog) {
 
 // DELETE BLOG
 async function deleteBlog(blogId) {
-    const confirmDelete = confirm("Are you sure you want to delete this blog?");
+    const confirmDelete = confirm(
+        "Are you sure you want to delete this blog?"
+    );
 
     if (!confirmDelete) return;
 
@@ -185,10 +245,6 @@ function displayBlogs(container, blogs) {
         return;
     }
 
-    const currentUser = JSON.parse(
-        localStorage.getItem("blogUser") || "null"
-    );
-
     blogs.forEach(function (blog) {
         const blogCard = document.createElement("div");
         blogCard.className = "blog-card";
@@ -198,7 +254,8 @@ function displayBlogs(container, blogs) {
         title.style.cursor = "pointer";
 
         title.addEventListener("click", function () {
-            window.location.href = "blog-details.html?id=" + blog._id;
+            window.location.href =
+                "blog-details.html?id=" + blog._id;
         });
 
         const category = document.createElement("p");
@@ -215,7 +272,7 @@ function displayBlogs(container, blogs) {
         blogCard.appendChild(content);
         blogCard.appendChild(author);
 
-        if (currentUser && currentUser.name === blog.author) {
+        if (isBlogOwner(blog)) {
             const editButton = document.createElement("button");
             editButton.textContent = "Edit";
             editButton.className = "btn";
@@ -240,7 +297,7 @@ function displayBlogs(container, blogs) {
     });
 }
 
-// LOAD ALL BLOGS
+// LOAD ALL BLOGS AND MY BLOGS
 async function loadBlogs() {
     const allBlogsContainer = document.getElementById("blog-list");
     const myBlogsContainer = document.getElementById("my-blog-list");
@@ -248,28 +305,26 @@ async function loadBlogs() {
     if (!allBlogsContainer && !myBlogsContainer) return;
 
     try {
-        const blogs = await apiRequest("/blogs");
-
         if (allBlogsContainer) {
+            const blogs = await apiRequest("/blogs");
             displayBlogs(allBlogsContainer, blogs);
         }
 
         if (myBlogsContainer) {
-            const user = JSON.parse(
-                localStorage.getItem("blogUser") || "null"
-            );
-
-            const myBlogs = user
-                ? blogs.filter(function (blog) {
-                    return blog.author === user.name;
-                })
-                : [];
-
+            const myBlogs = await apiRequest("/my-blogs");
             displayBlogs(myBlogsContainer, myBlogs);
         }
 
     } catch (error) {
         console.error("Error loading blogs:", error);
+
+        if (myBlogsContainer) {
+            myBlogsContainer.textContent = error.message;
+        }
+
+        if (allBlogsContainer) {
+            allBlogsContainer.textContent = error.message;
+        }
     }
 }
 
@@ -327,11 +382,7 @@ async function loadBlogDetails() {
             <p>${escapeHTML(blog.content)}</p>
         `;
 
-        const user = JSON.parse(
-            localStorage.getItem("blogUser") || "null"
-        );
-
-        if (user && user.name === blog.author) {
+        if (isBlogOwner(blog)) {
             const editButton = document.createElement("button");
             editButton.textContent = "Edit";
             editButton.className = "btn";
@@ -357,7 +408,7 @@ async function loadBlogDetails() {
     }
 }
 
-// Escape HTML characters before displaying blog content
+// ESCAPE HTML CHARACTERS
 function escapeHTML(value) {
     return String(value).replace(/[&<>"']/g, function (character) {
         const characters = {
@@ -373,5 +424,13 @@ function escapeHTML(value) {
 }
 
 // RUN PAGE FUNCTIONS
-loadBlogs();
+if (isDashboardPage) {
+    if (localStorage.getItem("token")) {
+        loadProfile();
+        loadBlogs();
+    }
+} else {
+    loadBlogs();
+}
+
 loadBlogDetails();

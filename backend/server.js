@@ -37,7 +37,6 @@ app.get("/", (req, res) => {
 // AUTHENTICATION MIDDLEWARE
 function authenticateToken(req, res, next) {
     const authHeader = req.headers.authorization;
-
     const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
@@ -58,7 +57,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// CHECK BLOG OWNER
+// CHECK BLOG OWNER USING USER ID
 async function checkBlogOwner(req, res, next) {
     try {
         const blog = await Blog.findById(req.params.id);
@@ -69,7 +68,10 @@ async function checkBlogOwner(req, res, next) {
             });
         }
 
-        if (blog.author !== req.user.name) {
+        if (
+            !blog.authorId ||
+            blog.authorId.toString() !== req.user.id
+        ) {
             return res.status(403).json({
                 message: "You cannot modify this blog."
             });
@@ -165,7 +167,6 @@ app.post("/api/login", async (req, res) => {
             });
         }
 
-        // Generate JWT token
         const token = jwt.sign(
             {
                 id: user._id.toString(),
@@ -178,13 +179,11 @@ app.post("/api/login", async (req, res) => {
             }
         );
 
-        console.log("JWT token generated successfully");
-
-        // Send token to frontend
         return res.status(200).json({
             message: "Login successful",
             token: token,
             user: {
+                id: user._id,
                 name: user.name,
                 email: user.email
             }
@@ -198,7 +197,33 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
-// GET ALL BLOGS
+// GET LOGGED-IN USER PROFILE
+app.get(
+    "/api/profile",
+    authenticateToken,
+    async (req, res) => {
+        try {
+            const user = await User.findById(req.user.id)
+                .select("-password");
+
+            if (!user) {
+                return res.status(404).json({
+                    message: "User not found"
+                });
+            }
+
+            res.status(200).json(user);
+
+        } catch (error) {
+            res.status(500).json({
+                message: "Unable to fetch profile",
+                error: error.message
+            });
+        }
+    }
+);
+
+// GET ALL PUBLIC BLOGS
 app.get("/api/blogs", async (req, res) => {
     try {
         const blogs = await Blog.find().sort({
@@ -214,6 +239,29 @@ app.get("/api/blogs", async (req, res) => {
         });
     }
 });
+
+// GET ONLY LOGGED-IN USER'S BLOGS
+app.get(
+    "/api/my-blogs",
+    authenticateToken,
+    async (req, res) => {
+        try {
+            const blogs = await Blog.find({
+                authorId: req.user.id
+            }).sort({
+                createdAt: -1
+            });
+
+            res.status(200).json(blogs);
+
+        } catch (error) {
+            res.status(500).json({
+                message: "Unable to fetch your blogs",
+                error: error.message
+            });
+        }
+    }
+);
 
 // GET SINGLE BLOG
 app.get("/api/blogs/:id", async (req, res) => {
@@ -254,7 +302,8 @@ app.post(
                 title,
                 category,
                 content,
-                author: req.user.name
+                author: req.user.name,
+                authorId: req.user.id
             });
 
             await newBlog.save();
@@ -340,5 +389,8 @@ mongoose.connect(process.env.MONGO_URI)
         });
     })
     .catch((error) => {
-        console.error("MongoDB connection failed:", error.message);
+        console.error(
+            "MongoDB connection failed:",
+            error.message
+        );
     });

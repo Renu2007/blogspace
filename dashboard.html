@@ -23,6 +23,12 @@
 
         <h2 id="dashboard-title">My Dashboard</h2>
 
+        <section>
+            <h2>My Profile</h2>
+            <p><strong>Name:</strong> <span id="profile-name">Loading...</span></p>
+            <p><strong>Email:</strong> <span id="profile-email">Loading...</span></p>
+        </section>
+
         <p>Manage your stories and explore your creativity.</p>
 
         <a class="btn" href="create-blog.html">
@@ -33,7 +39,7 @@
             <h2>My Blogs</h2>
 
             <div id="my-blog-list">
-                <p>Your published blogs will appear here.</p>
+                <p>Loading your blogs...</p>
             </div>
         </section>
 
@@ -52,16 +58,6 @@
     </footer>
 
     <script src="script.js"></script>
-
-    <script>
-        const logoutLink = document.getElementById("logout-link");
-
-logoutLink.addEventListener("click", function () {
-    localStorage.removeItem("blogUser");
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("token");
-});
-    </script>
 
 </body>
 </html>
