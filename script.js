@@ -1,6 +1,5 @@
 
-const API_URL = "http://localhost:3000/api";
-
+const API_URL = "https://blogspace-1-o10r.onrender.com/api";
 // Get form elements
 const registerForm = document.getElementById("register-form");
 const loginForm = document.getElementById("login-form");
