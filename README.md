@@ -1,62 +1,94 @@
 # BlogSpace 📝
 
-A responsive Blog Application frontend built using HTML, CSS, and JavaScript. BlogSpace allows users to register, log in to a demo account, create blog posts, and view blogs on the Home page and Dashboard.
+A Full Stack Blog Application built using HTML, CSS, JavaScript, Node.js, Express.js and MongoDB.
+
+BlogSpace allows users to register, log in securely, create and manage blog posts, and explore blogs shared by users.
 
 ## 🚀 Features
 
-- **Home Page:** Displays published blog posts.
-- **User Registration:** Register using a name, email, and password for the demo.
-- **User Login:** Check login details against the registered demo user.
-- **Create Blog:** Publish posts with a title, category, and content.
-- **Dashboard:** View the logged-in user's blog posts.
-- **Responsive Design:** CSS styling for desktop and mobile screens.
-- **Local Storage:** Saves demo user details and blog posts in the browser.
+- **User Registration:** Create an account with name, email and password.
+- **User Login:** Secure authentication using JWT.
+- **Dashboard:** Access a personalized user dashboard.
+- **Create Blogs:** Publish blog posts with title, category and content.
+- **View Blogs:** Explore published blog posts.
+- **Edit Blogs:** Update existing blog posts.
+- **Delete Blogs:** Remove blog posts.
+- **User Profile:** Display logged-in user information.
+- **Logout:** Securely end the user session.
+- **Protected Routes:** Restrict dashboard access to authenticated users.
+- **Responsive Design:** Supports desktop and mobile screens.
 
 ## 🛠️ Technologies Used
 
+**Frontend**
 - HTML5
 - CSS3
 - JavaScript
-- Browser Local Storage
+
+**Backend**
+- Node.js
+- Express.js
+- JWT Authentication
+- bcryptjs
+
+**Database**
+- MongoDB Atlas
+- Mongoose
+
+**Development Tools**
+- Visual Studio Code
+- Git and GitHub
+- Postman
 
 ## 📂 Project Structure
 
 ```text
 blogspace/
+│
+├── backend/
+│   ├── models/
+│   │   ├── User.js
+│   │   └── Blog.js
+│   ├── server.js
+│   ├── .env
+│   └── package.json
+│
 ├── index.html
 ├── login.html
 ├── register.html
 ├── dashboard.html
 ├── create-blog.html
-├── style.css
 ├── script.js
+├── style.css
 └── README.md
 ```
 
-## ▶️ How to Run
+## ⚙️ Installation and Setup
 
-1. Clone or download this repository.
-2. Open the project folder in Visual Studio Code.
-3. Open `index.html` using the Live Server extension, or open it directly in a browser.
-4. Register a demo account and log in.
-5. Create a blog post and view it on the Home page and Dashboard.
+### 1. Clone the repository
 
-## 🔮 Future Improvements
+```bash
+git clone https://github.com/Renu2007/blogspace.git
+```
 
-- Develop a backend using Node.js and Express.js.
-- Integrate MongoDB or Supabase for persistent data storage.
-- Implement secure authentication and protected dashboard routes.
-- Add edit, delete, search, and category-filtering features.
-- Deploy the complete full-stack application.
+### 2. Open the project folder
 
-## ⚠️ Current Limitations
+```bash
+cd blogspace
+```
 
-This version is a frontend demonstration. User details and blog posts are stored in browser Local Storage, not a database. Authentication is not production-secure. Use test credentials only.
+### 3. Install backend dependencies
 
-## 👩‍💻 Project Status
+```bash
+cd backend
+npm install
+```
 
-Frontend implementation completed as an initial stage of the BlogSpace project. Backend development, database integration, and additional features are planned as future improvements.
+### 4. Configure environment variables
 
----
+Create a `.env` file inside the backend folder.
 
-**Built as part of my web development learning journey.**
+Add your MongoDB connection string and JWT secret:
+
+```env
+MONGO_URI=your_m
