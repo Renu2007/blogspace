@@ -57,7 +57,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// CHECK BLOG OWNER USING USER ID
+// CHECK BLOG OWNER
 async function checkBlogOwner(req, res, next) {
     try {
         const blog = await Blog.findById(req.params.id);
@@ -133,7 +133,7 @@ app.post("/api/register", async (req, res) => {
     }
 });
 
-// LOGIN ROUTE WITH JWT
+// LOGIN ROUTE
 app.post("/api/login", async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -179,7 +179,7 @@ app.post("/api/login", async (req, res) => {
             }
         );
 
-        return res.status(200).json({
+        res.status(200).json({
             message: "Login successful",
             token: token,
             user: {
@@ -197,7 +197,7 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
-// GET LOGGED-IN USER PROFILE
+// GET USER PROFILE
 app.get(
     "/api/profile",
     authenticateToken,
@@ -240,7 +240,7 @@ app.get("/api/blogs", async (req, res) => {
     }
 });
 
-// GET ONLY LOGGED-IN USER'S BLOGS
+// GET LOGGED-IN USER'S BLOGS
 app.get(
     "/api/my-blogs",
     authenticateToken,
@@ -384,7 +384,7 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("MongoDB connected successfully!");
 
-        app.listen(PORT, () => {
+        app.listen(PORT, "0.0.0.0", () => {
             console.log(`Server running on port ${PORT}`);
         });
     })
@@ -393,4 +393,6 @@ mongoose.connect(process.env.MONGO_URI)
             "MongoDB connection failed:",
             error.message
         );
+
+        process.exit(1);
     });
